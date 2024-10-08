@@ -5,6 +5,35 @@ ODAS stands for Open embeddeD Audition System. This is a library dedicated to pe
 
 The [ODAS wiki](https://github.com/introlab/odas/wiki) describes how to build and run the software.
 
+---
+# Hexapod build - Raspberry Pi 4 Bookworm
+
+```
+sudo apt-get install libfftw3-dev libconfig-dev libasound2-dev libgconf-2-4
+
+---
+Dependency issue for uuid-dev
+---
+
+wget http://ftp.de.debian.org/debian/pool/main/u/util-linux/uuid-dev_2.38.1-5+deb12u1_armhf.deb
+sudo dpkg -i uuid-dev_2.38.1-5+deb12u1_armhf.deb
+dpkg -l | grep uuid-dev
+
+hexapod@hexapod:~ $ dpkg -l | grep uuid-dev
+ii  libossp-uuid-dev:armhf               1.6.2-1.5+b11                    armhf        OSSP uuid ISO-C and C++ - headers and static libraries
+ii  uuid-dev:armhf                       2.38.1-5+deb12u1                 armhf        Universally Unique ID library - headers and static libraries
+
+sudo apt-get install libpulse-dev
+
+sudo apt-get install cmake
+git clone https://github.com/introlab/odas.git
+mkdir odas/build
+cd odas/build
+cmake ..
+make
+```
+---
+
 ROS: Please visite the [odas_ros project](https://github.com/introlab/odas_ros).
 
 [![ODAS Demonstration](https://img.youtube.com/vi/n7y2rLAnd5I/0.jpg)](https://youtu.be/n7y2rLAnd5I)
