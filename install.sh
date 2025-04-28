@@ -83,7 +83,7 @@ if [ ! -f "$BUILD_BIN/odaslive" ] || [ ! -f "$BUILD_BIN/odasserver" ]; then
 fi
 
 # Create symlinks in user's local bin directory
-ln -sf "$BUILD_BIN/odaslive" "$LOCAL_BIN/odaslive"
+ln -sf "$BUILD_BIN/odaslive" "$LOCAL_BIN/odas"
 ln -sf "$BUILD_BIN/odasserver" "$LOCAL_BIN/odasserver"
 
 # Add local bin to PATH if not already present
@@ -94,10 +94,10 @@ if [[ ":$PATH:" != *":$LOCAL_BIN:"* ]]; then
 fi
 
 echo -e "${GREEN}ODAS installation completed successfully!${NC}"
-echo -e "${YELLOW}You can now run odaslive or odasserver from anywhere${NC}"
+echo -e "${YELLOW}You can now run odas or odasserver from anywhere${NC}"
 echo -e "${YELLOW}Executables are available in $LOCAL_BIN${NC}"
 
 # Print usage information
 echo -e "\n${GREEN}Usage Examples:${NC}"
-echo -e "${YELLOW}odaslive -c config/odaslive/respeaker_4_mic_array.cfg${NC}"
+echo -e "${YELLOW}odas -c config/odaslive/respeaker_4_mic_array.cfg${NC}"
 echo -e "${YELLOW}odasserver -c config/odasserver/respeaker_4_mic_array.cfg${NC}"
