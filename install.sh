@@ -1,9 +1,35 @@
 #!/bin/bash
 
-# ODAS Installation Script
-# This script installs ODAS and its dependencies
+# ODAS (Open embeddeD Audition System) Installation Script
+# ======================================================
+#
+# This script builds and installs ODAS, a framework dedicated to
+# robot audition. It handles the compilation process and creates
+# convenient symlinks for the executables.
+#
+# Usage:
+#   ./install.sh
+#
+# Prerequisites:
+#   - CMake (version 3.0 or higher)
+#   - Make
+#   - GCC
+#   - Git (for cloning the repository)
+#
+# Installation Steps:
+#   1. Creates a build directory
+#   2. Configures the project with CMake
+#   3. Compiles the source code
+#   4. Creates symlinks in ~/.local/bin
+#   5. Updates PATH if necessary
+#
+# Output:
+#   - Executables: odaslive, odasserver
+#   - Symlinks in ~/.local/bin
+#   - Library files in build/lib
 
-set -e  # Exit on error
+# Exit on error
+set -e
 
 # Colors for output
 RED='\033[0;31m'
@@ -70,3 +96,8 @@ fi
 echo -e "${GREEN}ODAS installation completed successfully!${NC}"
 echo -e "${YELLOW}You can now run odaslive or odasserver from anywhere${NC}"
 echo -e "${YELLOW}Executables are available in $LOCAL_BIN${NC}"
+
+# Print usage information
+echo -e "\n${GREEN}Usage Examples:${NC}"
+echo -e "${YELLOW}odaslive -c config/odaslive/respeaker_4_mic_array.cfg${NC}"
+echo -e "${YELLOW}odasserver -c config/odasserver/respeaker_4_mic_array.cfg${NC}"
