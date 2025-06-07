@@ -17,11 +17,12 @@
 #   - Git (for cloning the repository)
 #
 # Installation Steps:
-#   1. Creates a build directory
-#   2. Configures the project with CMake
-#   3. Compiles the source code
-#   4. Creates symlinks in ~/.local/bin
-#   5. Updates PATH if necessary
+#   1. Installs required system dependencies (libfftw3-dev, libasound2-dev, libconfig-dev, libpulse-dev)
+#   2. Creates a build directory
+#   3. Configures the project with CMake
+#   4. Compiles the source code
+#   5. Creates symlinks in ~/.local/bin
+#   6. Updates PATH if necessary
 #
 # Output:
 #   - Executables: odaslive, odasserver
@@ -53,6 +54,12 @@ echo -e "${YELLOW}Checking for required tools...${NC}"
 command -v cmake >/dev/null 2>&1 || { echo -e "${RED}cmake is required but not installed.${NC}"; exit 1; }
 command -v make >/dev/null 2>&1 || { echo -e "${RED}make is required but not installed.${NC}"; exit 1; }
 command -v gcc >/dev/null 2>&1 || { echo -e "${RED}gcc is required but not installed.${NC}"; exit 1; }
+command -v sudo >/dev/null 2>&1 || { echo -e "${RED}sudo is required but not installed.${NC}"; exit 1; }
+
+# Install required system dependencies
+echo -e "${YELLOW}Installing required system dependencies...${NC}"
+sudo apt-get update
+sudo apt-get install -y libfftw3-dev libasound2-dev libconfig-dev libpulse-dev
 
 # Create build directory
 echo -e "${YELLOW}Creating build directory...${NC}"
