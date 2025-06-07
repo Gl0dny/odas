@@ -59,7 +59,7 @@ command -v sudo >/dev/null 2>&1 || { echo -e "${RED}sudo is required but not ins
 # Install required system dependencies
 echo -e "${YELLOW}Installing required system dependencies...${NC}"
 sudo apt-get update
-sudo apt-get install -y libfftw3-dev libasound2-dev libconfig-dev libpulse-dev
+sudo apt-get install -y cmake libfftw3-dev libasound2-dev libconfig-dev libpulse-dev
 
 # Create build directory
 echo -e "${YELLOW}Creating build directory...${NC}"
