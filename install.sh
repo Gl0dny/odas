@@ -1,33 +1,13 @@
 #!/bin/bash
 
 # ODAS (Open embeddeD Audition System) Installation Script
-# ======================================================
+# ========================================================
 #
-# This script builds and installs ODAS, a framework dedicated to
-# robot audition. It handles the compilation process and creates
-# convenient symlinks for the executables.
+# This script installs and builds ODAS.
+# It automatically installs any missing tools or libraries using apt.
 #
 # Usage:
 #   ./install.sh
-#
-# Prerequisites:
-#   - CMake (version 3.0 or higher)
-#   - Make
-#   - GCC
-#   - Git (for cloning the repository)
-#
-# Installation Steps:
-#   1. Installs required system dependencies (libfftw3-dev, libasound2-dev, libconfig-dev, libpulse-dev)
-#   2. Creates a build directory
-#   3. Configures the project with CMake
-#   4. Compiles the source code
-#   5. Creates symlinks in ~/.local/bin
-#   6. Updates PATH if necessary
-#
-# Output:
-#   - Executables: odaslive, odasserver
-#   - Symlinks in ~/.local/bin
-#   - Library files in build/lib
 
 # Exit on error
 set -e
@@ -38,73 +18,96 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-# Get the directory where the script is located
+# Get script directory
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 echo -e "${GREEN}Starting ODAS installation...${NC}"
 
-# Check if running as root
+# Prevent running as root
 if [ "$EUID" -eq 0 ]; then 
     echo -e "${RED}Please do not run this script as root${NC}"
     exit 1
 fi
 
-# Check for required tools
-echo -e "${YELLOW}Checking for required tools...${NC}"
-command -v cmake >/dev/null 2>&1 || { echo -e "${RED}cmake is required but not installed.${NC}"; exit 1; }
-command -v make >/dev/null 2>&1 || { echo -e "${RED}make is required but not installed.${NC}"; exit 1; }
-command -v gcc >/dev/null 2>&1 || { echo -e "${RED}gcc is required but not installed.${NC}"; exit 1; }
-command -v sudo >/dev/null 2>&1 || { echo -e "${RED}sudo is required but not installed.${NC}"; exit 1; }
+# Function to check and install a package if not present
+install_if_missing() {
+    PACKAGE=$1
+    if ! dpkg -s "$PACKAGE" &> /dev/null; then
+        echo -e "${YELLOW}Installing missing package: $PACKAGE${NC}"
+        sudo apt-get install -y "$PACKAGE"
+    else
+        echo -e "${GREEN}Package $PACKAGE is already installed.${NC}"
+    fi
+}
 
-# Install required system dependencies
-echo -e "${YELLOW}Installing required system dependencies...${NC}"
+# Function to check and install a tool if missing
+install_tool_if_missing() {
+    TOOL=$1
+    PACKAGE=${2:-$1}
+    if ! command -v "$TOOL" &> /dev/null; then
+        echo -e "${YELLOW}Tool $TOOL is missing. Installing package: $PACKAGE${NC}"
+        sudo apt-get install -y "$PACKAGE"
+    else
+        echo -e "${GREEN}Tool $TOOL is already installed.${NC}"
+    fi
+}
+
+echo -e "${YELLOW}Updating package lists...${NC}"
 sudo apt-get update
-sudo apt-get install -y cmake libfftw3-dev libasound2-dev libconfig-dev libpulse-dev
+
+# Install required tools
+echo -e "${YELLOW}Checking and installing required tools...${NC}"
+install_tool_if_missing cmake
+install_tool_if_missing make
+install_tool_if_missing gcc
+install_tool_if_missing git
+install_tool_if_missing sudo
+
+# Install required libraries
+echo -e "${YELLOW}Checking and installing required libraries...${NC}"
+install_if_missing libfftw3-dev
+install_if_missing libasound2-dev
+install_if_missing libconfig-dev
+install_if_missing libpulse-dev
 
 # Create build directory
 echo -e "${YELLOW}Creating build directory...${NC}"
 mkdir -p "$SCRIPT_DIR/build"
 cd "$SCRIPT_DIR/build"
 
-# Configure with CMake
-echo -e "${YELLOW}Configuring with CMake...${NC}"
+# Configure project with CMake
+echo -e "${YELLOW}Configuring project with CMake...${NC}"
 cmake ..
 
 # Build
 echo -e "${YELLOW}Building ODAS...${NC}"
-make -j$(nproc)
+make -j"$(nproc)"
 
-# Create local bin directory if it doesn't exist
+# Create local bin directory
 LOCAL_BIN="$HOME/.local/bin"
 mkdir -p "$LOCAL_BIN"
 
-# Create symlinks for the executables
-echo -e "${YELLOW}Creating symlinks for executables...${NC}"
+# Create symlinks
+echo -e "${YELLOW}Creating symlinks in $LOCAL_BIN...${NC}"
 BUILD_BIN="$SCRIPT_DIR/build/bin"
 
-# Check if executables exist
 if [ ! -f "$BUILD_BIN/odaslive" ] || [ ! -f "$BUILD_BIN/odasserver" ]; then
-    echo -e "${RED}Error: ODAS executables not found in $BUILD_BIN${NC}"
-    echo -e "${YELLOW}Please check the build directory and try again${NC}"
+    echo -e "${RED}Error: Executables not found in $BUILD_BIN${NC}"
     exit 1
 fi
 
-# Create symlinks in user's local bin directory
 ln -sf "$BUILD_BIN/odaslive" "$LOCAL_BIN/odas"
 ln -sf "$BUILD_BIN/odasserver" "$LOCAL_BIN/odasserver"
 
-# Add local bin to PATH if not already present
+# Add ~/.local/bin to PATH if not already there
 if [[ ":$PATH:" != *":$LOCAL_BIN:"* ]]; then
     echo -e "${YELLOW}Adding $LOCAL_BIN to PATH in .bashrc${NC}"
     echo "export PATH=\"\$PATH:$LOCAL_BIN\"" >> "$HOME/.bashrc"
-    echo -e "${YELLOW}Please restart your terminal or run 'source ~/.bashrc' to update PATH${NC}"
+    echo -e "${YELLOW}Please restart your terminal or run 'source ~/.bashrc'${NC}"
 fi
 
+# Done
 echo -e "${GREEN}ODAS installation completed successfully!${NC}"
-echo -e "${YELLOW}You can now run odas or odasserver from anywhere${NC}"
-echo -e "${YELLOW}Executables are available in $LOCAL_BIN${NC}"
-
-# Print usage information
-echo -e "\n${GREEN}Usage Examples:${NC}"
-echo -e "${YELLOW}odas -c config/odaslive/respeaker_4_mic_array.cfg${NC}"
-echo -e "${YELLOW}odasserver -c config/odasserver/respeaker_4_mic_array.cfg${NC}"
+echo -e "${YELLOW}You can now run:${NC}"
+echo -e "  ${GREEN}odas -c config/odaslive/respeaker_4_mic_array.cfg${NC}"
+echo -e "  ${GREEN}odasserver -c config/odasserver/respeaker_4_mic_array.cfg${NC}"
