@@ -99,12 +99,15 @@ fi
 ln -sf "$BUILD_BIN/odaslive" "$LOCAL_BIN/odas"
 ln -sf "$BUILD_BIN/odasserver" "$LOCAL_BIN/odasserver"
 
-# Add ~/.local/bin to PATH if not already there
-if [[ ":$PATH:" != *":$LOCAL_BIN:"* ]]; then
-    echo -e "${YELLOW}Adding $LOCAL_BIN to PATH in .bashrc${NC}"
-    echo "export PATH=\"\$PATH:$LOCAL_BIN\"" >> "$HOME/.bashrc"
-    echo -e "${YELLOW}Please restart your terminal or run 'source ~/.bashrc'${NC}"
-fi
+# Add ~/.local/bin to PATH in both .bashrc and .zshrc if not already present
+for RC_FILE in "$HOME/.bashrc" "$HOME/.zshrc"; do
+    if [ -f "$RC_FILE" ] && ! grep -q "$LOCAL_BIN" "$RC_FILE"; then
+        echo -e "${YELLOW}Adding $LOCAL_BIN to PATH in $RC_FILE${NC}"
+        echo "export PATH=\"\$PATH:$LOCAL_BIN\"" >> "$RC_FILE"
+    fi
+done
+
+echo -e "${YELLOW}Please restart your terminal or run 'source ~/.bashrc' or 'source ~/.zshrc'${NC}"
 
 # Done
 echo -e "${GREEN}ODAS installation completed successfully!${NC}"
